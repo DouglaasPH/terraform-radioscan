@@ -1,0 +1,32 @@
+# Dockerfile de REFERENCIA para a clinic-api.
+# Copie este arquivo para a RAIZ do repositorio (mesmo nivel do pom.xml/mvnw).
+
+# ----------------------------------------------------------------
+# Etapa 1: build com o Maven Wrapper (o projeto usa mvnw, nao maven global)
+# ----------------------------------------------------------------
+FROM eclipse-temurin:25-jdk AS build
+WORKDIR /app
+
+# Copia primeiro so o que afeta o cache de dependencias, antes do codigo-fonte
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+RUN chmod +x mvnw && ./mvnw -B dependency:go-offline
+
+COPY src ./src
+RUN ./mvnw -B clean package -Dmaven.test.skip=true
+
+# ----------------------------------------------------------------
+# Etapa 2: imagem final, so com o jar (bem menor que a imagem de build)
+# ----------------------------------------------------------------
+# Se a tag "-alpine" ainda nao existir para o JDK 25 no seu Docker Hub local,
+# troque por "eclipse-temurin:25-jre" (um pouco maior, mas sempre disponivel).
+FROM eclipse-temurin:25-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+# Precisa bater com var.container_port no Terraform (default: 80)
+EXPOSE 80
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
+

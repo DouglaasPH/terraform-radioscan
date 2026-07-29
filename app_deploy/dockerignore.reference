@@ -1,0 +1,12 @@
+# .dockerignore de REFERENCIA para a clinic-api.
+# Copie para a raiz do repositorio (mesmo nivel do Dockerfile).
+# Evita copiar arquivos grandes/sensiveis pro contexto de build.
+
+target/
+.git
+.gitignore
+.gitattributes
+.idea
+.env
+.env.example
+*.md
