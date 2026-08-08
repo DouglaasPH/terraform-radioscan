@@ -4,6 +4,12 @@ Complete infrastructure for the **radioscan** application, simulating AWS via **
 
 <br>
 
+## Solution Architecture Diagram
+
+![Solution Architecture Diagram](solution-architecture-diagram.png)
+
+<br>
+
 ## Architecture
 
 | Layer | Terraform File | Key Resources |
