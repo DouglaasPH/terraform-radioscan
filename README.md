@@ -12,13 +12,13 @@ Complete infrastructure for the **radioscan** application, simulating AWS via **
 
 ## Architecture
 
-| Layer | Terraform File | Key Resources |
-|---|---|---|
-| Network | `main.tf` | VPC, public/private subnets, IGW, NAT, route tables |
-| Frontend | `frontend.tf` | `aws_s3_bucket.website`, `aws_cloudfront_distribution.cdn`, `aws_wafv2_web_acl.cdn`, `aws_route53_zone.this` |
-| Backend (API) | `main.tf` | ALB, ECS Cluster/Service/Task (Fargate), ECR, IAM roles |
-| Database | `database.tf` | `aws_db_instance.this` (PostgreSQL, private subnets) |
-| Image Pipeline | `messaging-images.tf` | `aws_s3_bucket.images`, `aws_sns_topic.image_upload`, `aws_sqs_queue.image_processing` (+ DLQ), `aws_lambda_function.image_processor`, `aws_ecr_repository.lambda_model` | Image pipeline flow (100% automated after upload):
+| Layer          | Terraform File        | Key Resources                                                                                                                                                            |
+| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| Network        | `main.tf`             | VPC, public/private subnets, IGW, NAT, route tables                                                                                                                      |
+| Frontend       | `frontend.tf`         | `aws_s3_bucket.website`, `aws_cloudfront_distribution.cdn`, `aws_wafv2_web_acl.cdn`, `aws_route53_zone.this`                                                             |
+| Backend (API)  | `main.tf`             | ALB, ECS Cluster/Service/Task (Fargate), ECR, IAM roles                                                                                                                  |
+| Database       | `database.tf`         | `aws_db_instance.this` (PostgreSQL, private subnets)                                                                                                                     |
+| Image Pipeline | `messaging-images.tf` | `aws_s3_bucket.images`, `aws_sns_topic.image_upload`, `aws_sqs_queue.image_processing` (+ DLQ), `aws_lambda_function.image_processor`, `aws_ecr_repository.lambda_model` | Image pipeline flow (100% automated after upload): |
 
 ```
 1. Client requests pre-signed URL -> StorageGateway.generatePresignedUploadUrl() (API)
@@ -55,7 +55,7 @@ localstack/localstack
 
 ### 2. Create the remote backend bucket (state)
 
-The `backend.tf` file points to an S3 bucket that must exist *before* running `terraform init`:
+The `backend.tf` file points to an S3 bucket that must exist _before_ running `terraform init`:
 
 ```powershell
 aws s3 mb s3://radioscan-tfstate-local --endpoint-url http://localhost:4566
@@ -154,7 +154,7 @@ terraform output alb_dns_name
 The static site resides in the `aws_s3_bucket.website` bucket and is served publicly via CloudFront (with WAF in front). Terraform already creates the bucket, configures static hosting for it, and sets up the CloudFront distribution—all that remains is to **deploy the files** after generating the frontend build.
 
 1. Generate the static frontend build as usual (`npm run build`). Note the name
-of the generated folder (`dist`, `build`, etc.).
+   of the generated folder (`dist`, `build`, etc.).
 2. Run the following command, pointing to the build folder:
 
 ```powershell
@@ -170,6 +170,14 @@ This performs an `aws s3 sync` from the build folder to the `radioscan-dev-websi
 ```powershell
 terraform output cloudfront_domain_name
 ```
+
+4. Frontend URL available via Bucket S3:
+
+```powershell
+terraform output website_bucket_name
+```
+
+`Don't forget to include the port at the end of the URL. Example: http://767df086.cloudfront.localhost.localstack.cloud:4566`
 
 <br>
 
