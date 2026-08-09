@@ -94,6 +94,28 @@ terraform apply
 terraform output
 ```
 
+### 8. Check the credentials database
+
+```powershell
+terraform output rds_endpoint      # host:port
+terraform output rds_database_name
+terraform output rds_username
+terraform output -raw rds_password # -raw to get it without quotes/escaping
+```
+
+### 9. Access the database
+
+```powershell
+docker exec -it <container id of the localstack> bash
+
+psql -h localhost.localstack.cloud \
+     -p 4510 \
+     -U radioscan_admin \
+     -d radioscandb
+```
+
+After executing the psql command, it will prompt you for your RDS password. It is generated automatically and can be viewed through command `terraform output -raw rds_password`.
+
 <br>
 
 ## Publishing the Java API (Radioscan project: https://github.com/DouglaasPH/api-radioscan)
